@@ -52,15 +52,16 @@ public:
 
   template <typename T> T rtw_read(uint16_t reg_num) {
     T data = 0;
-    if (libusb_control_transfer(_dev_handle, REALTEK_USB_VENQT_READ, 5, reg_num,
+
+    int res = libusb_control_transfer(_dev_handle, REALTEK_USB_VENQT_READ, 5, reg_num,
                                 0, (uint8_t *)&data, sizeof(T),
-                                USB_TIMEOUT) == sizeof(T)) {
+                                USB_TIMEOUT);
+    if (res == sizeof(T)) {
       return data;
     }
 
-    _logger->error("rtw_read({:x}), sizeof(T) = {}", reg_num, sizeof(T));
+    _logger->error("rtw_read({:x}), sizeof(T) = {}, error: {}", reg_num, sizeof(T), res);
     throw std::ios_base::failure("rtw_read");
-    return 0;
   }
 
   template <typename T> bool rtw_write(uint16_t reg_num, T value) {
